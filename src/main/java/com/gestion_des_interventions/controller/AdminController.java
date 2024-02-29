@@ -20,73 +20,82 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.gestion_des_interventions.model.Admin;
+import com.gestion_des_interventions.model.Client;
+import com.gestion_des_interventions.model.EquipeTech;
 import com.gestion_des_interventions.repository.AdminRepo;
+import com.gestion_des_interventions.repository.ClientRepo;
+import com.gestion_des_interventions.repository.EquipeTechRepo;
 
 
 @RestController
 @RequestMapping("api/admin")
 public class AdminController {
 	
-	@Autowired
-	private final AdminRepo adminRepo;
 	
-	public AdminController(AdminRepo adminRepo) {
-		this .adminRepo=adminRepo;
-	}
+	@Autowired
+	private  AdminRepo adminRepo;
+
+	@Autowired
+    private  ClientRepo clientrepo;
+	@Autowired
+	private EquipeTechRepo equipeTechRepo;
+	
 	
 	@GetMapping("/all")
 	public List<Admin> getAll(){
 		return this.adminRepo.findAll();
 	}
 	
-	// get by id 
 	//@Requestparam
 	@GetMapping("/get_by_id/")
-	public Admin getByid(@RequestParam Long id ) {
-		//return this.adminRepo.findById(id).get();
-		 Optional<Admin> optionalAdmin = adminRepo.findById(id);
-	        return optionalAdmin.orElse(null);
-		}
-	
-	// get by id 
+	public ResponseEntity<Admin> getdByid(@RequestParam Long id) {
+	    Optional<Admin> adexiste = this.adminRepo.findById(id);
+	    if (adexiste.isPresent()) {
+	        Admin admin = adexiste.get();
+	        return new ResponseEntity<>(admin, HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}}
 	//@@PathVariabl
 	@GetMapping("/get_by_id/{id}")
-	public Admin findByid(@PathVariable Long id ) {
-		 Optional<Admin> a = this.adminRepo.findById(id) ;// Retourne null si le compte n'existe pas
-		return a.orElse(null);
-    }
 	
-	//delete by id @variable
-	@DeleteMapping("/delet_admin_by_id/{id}")
-	public String supprimerAdmin(@PathVariable Long id ) {
-		this.adminRepo.deleteById(id);
-		return "Admin was successfully deleted";
+	public ResponseEntity<String> supprimerAdmin(@PathVariable Long id) { 
+	    if (this.adminRepo.existsById(id)) {
+	        this.adminRepo.deleteById(id);
+	        return new ResponseEntity<>("Admin with ID " + id + " was successfully deleted.", HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>("Admin with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
+	    }
 	}
-	
+
 	//delete by id @param
 	@DeleteMapping("/delet_admin_by_id/")
-	public String suppAdmin(@RequestParam Long  id ) {
-		this.adminRepo.deleteById(id);
-		return "Admin was successfully deleted";
-		}
+	public ResponseEntity<String> suppAdmin(@RequestParam Long id) { 
+	    if (this.adminRepo.existsById(id)) {
+	        this.adminRepo.deleteById(id);
+	        return new ResponseEntity<>("Admin with ID " + id + " was successfully deleted.", HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>("Admin with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
+	    }
+	}
+
 	
 	// delete all 
 	@DeleteMapping("/delet_all_admin")
 	public   ResponseEntity<Void> supprimerAdmin() {
 		this.adminRepo.deleteAll();
-		return ResponseEntity.noContent().build(); //method is used to return an HTTP 204 No Content status code, indicating that the delete
+		return ResponseEntity.noContent().build(); 
 		}
 
-	//Créer un nouveau compte
-	/*public Admin ajouterAdmin( @RequestBody Admin  admin ) {
-		return this.adminRepo.save(admin);
-	}*/
+	
+	
 	@PostMapping("/add_admin")
-	public ResponseEntity<Admin> ajouterUser (@RequestBody Admin admin ) {
-		Optional<Admin> adminexiste=adminRepo.findById(admin.getId());
+	public ResponseEntity<String> ajouterAdmin (@RequestBody Admin admin ) {
 		
-		if (adminexiste.isPresent()) {
-			return null ; 	}
+		
+		if (this.adminRepo.existsById(admin.getId())) {
+			
+		return new ResponseEntity<>("admin with id  " + admin.getId() + " already exists.", HttpStatus.CONFLICT); 	}
 		else {
 		Admin nv= new Admin ();
 		nv.setDateDeNaissance(admin.getDateDeNaissance());		
@@ -99,24 +108,24 @@ public class AdminController {
 		nv.setMdp(admin.getMdp());
 		
 		this.adminRepo.save(nv);
-		return new ResponseEntity<>(nv, HttpStatus.CREATED);
+		return new ResponseEntity<>("client with id  " + admin.getId() + " added successfully.", HttpStatus.CREATED);
 		}
 		}
 	
 	@PostMapping("/add_admin/{id}")
-	public ResponseEntity<Admin> ajoutUser (@PathVariable Long id , @RequestParam String nom, @RequestParam String prénom, @RequestParam String email,
+	public ResponseEntity<String> ajoutAdmin (@PathVariable Long id , @RequestParam String nom, @RequestParam String prénom, @RequestParam String email,
 			@RequestParam String tel,@RequestParam String sexe,@RequestParam Date dateDeNaissance,@RequestParam String mdp){
-		Optional<Admin> adminexiste =adminRepo.findById(id);
-		if (adminexiste.isPresent()) {
+		Optional<Admin> adexiste =adminRepo.findById(id);
+		if (adexiste.isPresent()) {
 			return null ;}
 			else {
 				Admin admin= new Admin( );
-				Admin nv = adminRepo.save(admin);
-				return new ResponseEntity<>(nv, HttpStatus.CREATED);
+				 this.adminRepo.save(admin);
+				return new ResponseEntity<>("client with id  " + admin.getId() + " added successfully.", HttpStatus.CREATED);
 			}
 		
 	}
-//Mettre à jour un compte existant
+
 	
 	@PutMapping("/update_admin/{iid}")
 	public Admin updateAdmin (@PathVariable("iid") Long id , @RequestBody Admin admin) {
@@ -133,57 +142,85 @@ public class AdminController {
         	nv.setTel(admin.getTel());
         	return this.adminRepo.save(nv);
         	}
-        else throw new NoSuchElementException("User not found with ID: " + admin.getId());
-// else retrne new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else throw new NoSuchElementException("admin not found with ID: " + admin.getId());
+         
 	}
 	
+	
+	
 	// Méthode pour afficher le nom d'un compte
-	/*@GetMapping("/get_by/{id}/nom")
-	public ResponseEntity<String>getNomById(@PathVariable Long id) {
-        Optional<Admin> existeadmin = adminRepo.findById(id);
-        if (existeadmin.isPresent() ) {
-        	new ResponseEntity<>(existeadmin.get().getNom(), HttpStatus.OK);}
-        else {
-        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        }*/
+	@GetMapping("/get_by/{id}/name")
+	public ResponseEntity<String> getNomById(@PathVariable Long id) {
+	    Optional<Admin> existeadmin = adminRepo.findById(id);
+	    if (existeadmin.isPresent()) {
+	        return new ResponseEntity<>("the name of admin is :" +existeadmin.get().getNom(), HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);
+	    }
+	}
 	
 	
-	/*@GetMapping("/get_by_id/{
- 
-  
-    }/prénom")
+	@GetMapping("/get_by_id/{id}/lastname")
 	public ResponseEntity<String> findPrénomById(@PathVariable Long id) {
         Optional<Admin> existeadmin = adminRepo.findById(id);
         if (existeadmin.isPresent() ) {
-        	new ResponseEntity<>(existeadmin.get().getPrénom(), HttpStatus.OK);     
+        	 return new ResponseEntity<>("the last name os admin is :"+existeadmin.get().getPrénom(), HttpStatus.OK);     
         	}
         else {
-        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);
         }
-        }*/
+        }
 	
 	
-	
-	
-	/*@GetMapping("/get_by_id/{id}/email")
+	@GetMapping("/get_by_id/{id}/email")
 	public ResponseEntity <String> getEmailById(@PathVariable Long id ) {
         Optional<Admin> existeadmin = adminRepo.findById(id);
         if (existeadmin.isPresent() ) {
-        	new ResponseEntity<>(existeadmin.get().getEmail(), HttpStatus.OK);     
+        	 return new ResponseEntity<>("the e-mail of admin is :"+existeadmin.get().getEmail(), HttpStatus.OK);     
         	}
         else 
-        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        
-		
-        }*/
+        	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);
+       }
+	
+
+	@GetMapping("/get_by_id/{id}/phone_number")
+	public ResponseEntity <String> getTelById(@PathVariable Long id ) {
+        Optional<Admin> existeadmin = adminRepo.findById(id);
+        if (existeadmin.isPresent() ) {
+        	 return new ResponseEntity<>("the phone number os admin is: "+existeadmin.get().getTel(), HttpStatus.OK);     
+        	}
+        else 
+        	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);  }
 	
 	
 	
 	
-	@GetMapping("get_admin/{nom}")
+	@GetMapping("/get_by_id/{id}/sexe")
+	public ResponseEntity <String> getSexeById(@PathVariable Long id ) {
+        Optional<Admin> existeadmin = adminRepo.findById(id);
+        if (existeadmin.isPresent() ) {
+        	 return new ResponseEntity<>("the sexe of admin is "+existeadmin.get().getSexe(), HttpStatus.OK);     
+        	}
+        else 
+        	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);  }
+	
+	
+	
+	
+	@GetMapping("/get_by_id/{id}/Date_of_birth")
+	public ResponseEntity <Date> getDateById(@PathVariable Long id ) {
+        Optional<Admin> existeadmin = adminRepo.findById(id);
+        if (existeadmin.isPresent() ) {
+        	 return new ResponseEntity<>(existeadmin.get().getDateDeNaissance(), HttpStatus.OK);     
+        	}
+        else 
+        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);  }
+	
+	
+	
+	/*@GetMapping("get_admin/{nom}")
 	public  ResponseEntity<Admin> getByNom(@PathVariable ("nom") String nom) {
-		Optional<Admin> existeadmin= this.adminRepo.findByNom(nom);
+		Optional<Admin> existeadmin= this.adminRepo.findByNomAdmin(nom);
 				if ( existeadmin.isPresent()) {
 					 return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);}
 				
@@ -192,41 +229,48 @@ public class AdminController {
 	}
 	
 	
-	@GetMapping("get_admin/nom")
-	public  ResponseEntity<Admin>  getBynom(@RequestParam String nom) {
-		Optional<Admin> existeadmin=this.adminRepo.findBynom(nom);
-				if ( existeadmin.isPresent()) {
-					return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
-				}
-				else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	
-	}
 	
 	
-	@GetMapping("get_admin/{prenom}")
+	
+	
+/*	
+	@GetMapping("get_admin/{prénom}")
 	public ResponseEntity<Admin> getByPrenom(@PathVariable String prénom ){
-		Optional<Admin> existeadmin=this.adminRepo.findByPrenom(prénom)
-				 ;
+		Optional<Admin> existeadmin=this.adminRepo.findByPrenomAdmin(prénom);
 		if ( existeadmin.isPresent()) {
 			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
 		}
 		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	}
+	}*/
 	
 	
-	@GetMapping("get_admin/prénom")
-	public ResponseEntity<Admin> getByprénom(@RequestParam String prénom ){
-		Optional<Admin> existeadmin=this.adminRepo.findByPrenom(prénom);
-		if ( existeadmin.isPresent()) {
-			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
-		}
-		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	}
-	}
+	   @PostMapping("/client/add")
+	    public void ajouterClient(@RequestBody Client client) {
+	        clientrepo.save(client);
+		   
+	    }
 	
 	
+	   @PostMapping("/client/remove")
+	    public void supprimerClient(@RequestBody Client client) {
+		   clientrepo.delete(client);
+	    }
+	   
+	   @PostMapping("/teams /add")
+	    public void ajouterEquipe(@RequestBody EquipeTech equipeTech ) {
+		   equipeTechRepo.save(equipeTech);
+		   
+	    }
 	
 	
+	   @PostMapping("/teams/remove")
+	    public void supprimerEquipe(@RequestBody EquipeTech equipeTech) {
+		   equipeTechRepo.delete(equipeTech);
+	    }
+	    
+	   
+	   
+}	
 	
 	
 	

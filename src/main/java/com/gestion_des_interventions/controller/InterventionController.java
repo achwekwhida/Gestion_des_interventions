@@ -18,8 +18,10 @@ import com.gestion_des_interventions.repository.InterventionRepo;
 @RestController
 @RequestMapping("/interventions")
 public class InterventionController{
+	
 	@Autowired
 	    private InterventionRepo interventionRepo;
+	
 
 	    @GetMapping
 	    public List<Intervention> getAllInterventions() {
