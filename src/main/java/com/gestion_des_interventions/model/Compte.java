@@ -2,6 +2,7 @@ package com.gestion_des_interventions.model;
 
 import java.util.Date;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,14 +16,21 @@ import jakarta.persistence.ManyToOne;
 public abstract class Compte {
  @Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
- private String nom;
- private String prénom;
- private String email;
- private String tel ;
- private String sexe;
- private Date dateDeNaissance;
- private String mdp;
+ @Column( updatable = false, nullable = false)
+protected Long id;
+ @Column( updatable = false, nullable = false)
+ protected String cin;
+ protected String nom;
+ protected String prénom;
+ @Column(insertable=true, updatable=true, nullable=false)
+ protected String email;
+ protected String tel ;
+ protected String sexe;
+ protected Date dateDeNaissance;
+ @Column(insertable=true, updatable=true, nullable=false)
+ protected String mdp;
+ protected Boolean active;
+ protected String civilité;
  
  @ManyToOne
  private Rôle rôle;
@@ -76,6 +84,24 @@ public void setDateDeNaissance(Date dateDeNaissance) {
 
 
 
+public String getCivilité() {
+	return civilité;
+}
+public void setCivilité(String civilité) {
+	this.civilité = civilité;
+}
+public String getCin() {
+	return cin;
+}
+public void setCin(String cin) {
+	this.cin = cin;
+}
+public Boolean getActive() {
+	return active;
+}
+public void setActive(Boolean active) {
+	this.active = active;
+}
 public String getMdp() {
 	return mdp;
 }
@@ -84,15 +110,11 @@ public void setMdp(String mdp) {
 }
 
 
-
-
-
-
-
-public Compte(Long id, String nom, String prénom, String email, String tel, String sexe, Date dateDeNaissance,
-		String mdp) {
+public Compte(Long id, String cin, String nom, String prénom, String email, String tel, String sexe,
+		Date dateDeNaissance, String mdp, Boolean active , String civilité) {
 	super();
 	this.id = id;
+	this.cin = cin;
 	this.nom = nom;
 	this.prénom = prénom;
 	this.email = email;
@@ -100,11 +122,13 @@ public Compte(Long id, String nom, String prénom, String email, String tel, Str
 	this.sexe = sexe;
 	this.dateDeNaissance = dateDeNaissance;
 	this.mdp = mdp;
+	this.active = active;
+	this.civilité = civilité;
 }
 public Compte() {
 	super();
 	// TODO Auto-generated constructor stub
-}
+	}
 
 
 

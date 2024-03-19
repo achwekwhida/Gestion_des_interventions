@@ -21,7 +21,7 @@ import com.gestion_des_interventions.model.Rôle;
 import com.gestion_des_interventions.repository.RôleRepo;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("api/roles")
 public class RôleController {
 	@Autowired
 	private final RôleRepo rôleRepo ;
@@ -61,18 +61,18 @@ public class RôleController {
 			//return ResponseEntity<>("all users  were successfully deleted",HttpStatus.)); //method is used to return an HTTP 204 No Content status code, indicating that the delete
 			}
 		@PostMapping("/add_role")
-		public ResponseEntity<String> ajouterClient (@RequestBody Rôle role ) {
+		public ResponseEntity<String> ajouterRole (@RequestBody Rôle role ) {
 			
 			
 			if (this.rôleRepo.existsById(role.getId())) {
 				return 
-					new ResponseEntity<>("client with id  " + role.getId() + " already exists.", HttpStatus.CONFLICT); 	}
+					new ResponseEntity<>("role  with id  " + role.getId() + " already exists.", HttpStatus.CONFLICT); 	}
 			else {
 			Rôle nv= new Rôle ();
 			nv.setType(role.getType());		
 			
 			this.rôleRepo.save(nv);
-			return new ResponseEntity<>("client with id  " + role.getId() + " added successfully.", HttpStatus.CREATED);
+			return new ResponseEntity<>("role  with id  " + role.getId() + " added successfully.", HttpStatus.CREATED);
 			}
 			}
 }

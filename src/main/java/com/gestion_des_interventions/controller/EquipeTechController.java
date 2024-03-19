@@ -2,7 +2,7 @@ package com.gestion_des_interventions.controller;
 
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gestion_des_interventions.model.Client;
 import com.gestion_des_interventions.model.EquipeTech;
 import com.gestion_des_interventions.repository.EquipeTechRepo;
 
 
 @RestController
-@RequestMapping("api/team")
+@RequestMapping("api/employee")
 public class EquipeTechController {
 
 
@@ -34,23 +35,72 @@ public class EquipeTechController {
 		this .equipeTechRepo=equipeTechRepo;
 	}
 
-	@GetMapping("all")
+	@GetMapping("get_all")
 	public List<EquipeTech> getAll(){
 		return this.equipeTechRepo.findAll();
 		}
-	/*@GetMapping("/get_by_name/{name}")
-	public Optional <EquipeTech> afficherParNom( @PathVariable String nom){
-		return equipeTechRepo.findByNomClient(nom);
-		}
-	/*@GetMapping("/get_by_lastname")
-	public Optional <EquipeTech> afficherParPrenom( @RequestParam String prenom){
-		return equipeTechRepo.findByNom(prenom);
-	}
+	
 	/*@GetMapping("/get_by_dateOfBirth")
 	public Optional <EquipeTech> afficherParDateDeNaissance( @RequestParam Date dateDeNaissance){
 		return equipeTechRepo.findByDateDeNaissance(dateDeNaissance);}
 	*/
 	
+	
+	@GetMapping("get_admin/{nom}")
+	public  ResponseEntity<EquipeTech> getByNom(@PathVariable ("nom") String nom) {
+		Optional<EquipeTech> existeEmployee= this.equipeTechRepo.findByNom(nom);
+				if ( existeEmployee.isPresent()) {
+					 return new ResponseEntity<>(existeEmployee.get(), HttpStatus.OK);}
+				
+				else  {
+					return new ResponseEntity<>(HttpStatus.NOT_FOUND);}
+	}
+	
+	@GetMapping("get_client/{prénom}")
+	public ResponseEntity<EquipeTech> getByPrenom(@PathVariable String prénom ){
+		Optional<EquipeTech> existeEmployee=this.equipeTechRepo.findByPrénom(prénom);
+		if ( existeEmployee.isPresent()) {
+			return new ResponseEntity<>(existeEmployee.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_client/{sexe}")
+	public ResponseEntity<EquipeTech> getBySexe(@PathVariable String sexe ){
+		Optional<EquipeTech> existeEmployee=this.equipeTechRepo.findBySexe(sexe);
+		if ( existeEmployee.isPresent()) {
+			return new ResponseEntity<>(existeEmployee.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_client/{civilité}")
+	public ResponseEntity<EquipeTech> getByCivilité(@PathVariable String civilité ){
+		Optional<EquipeTech> existeEmployee=this.equipeTechRepo.findByCivilité(civilité);
+		if ( existeEmployee.isPresent()) {
+			return new ResponseEntity<>(existeEmployee.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_client/{tel}")
+	public ResponseEntity<EquipeTech> getByTel(@PathVariable String tel ){
+		Optional<EquipeTech> existeEmployee=this.equipeTechRepo.findByTel(tel);
+		if ( existeEmployee.isPresent()) {
+			return new ResponseEntity<>(existeEmployee.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_client/{active}")
+	public ResponseEntity<EquipeTech> getByActive(@PathVariable Boolean active ){
+		Optional<EquipeTech> existeEmployee=this.equipeTechRepo.findByActive(active);
+		if ( existeEmployee.isPresent()) {
+			return new ResponseEntity<>(existeEmployee.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+
 	//@Requestparam
 		@GetMapping("/get_by_id/")
 		public ResponseEntity<EquipeTech> getdByid(@RequestParam Long id) {
@@ -76,45 +126,50 @@ public class EquipeTechController {
 	    
 		
 		//delete by id @variable
-		@DeleteMapping("/delet_team_by_id/{id}")
+		@DeleteMapping("/delet_employee_by_id/{id}")
 		public ResponseEntity<String> supprimerequipe(@PathVariable Long id) {
 		    Optional<EquipeTech> eqtexiste = this.equipeTechRepo.findById(id);
 		    if (eqtexiste.isPresent()) {
 		        this.equipeTechRepo.deleteById(id);
-		        return new ResponseEntity<>("person of teams with ID " + id + " was successfully deleted.", HttpStatus.OK);
+		        return new ResponseEntity<>("employee with ID " + id + " was successfully deleted.", HttpStatus.OK);
 		    } else {
-		        return new ResponseEntity<>("person of team with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
+		        return new ResponseEntity<>("employee  with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
 		    }
 		}
 
 		//delete by id @param
-		@DeleteMapping("/delet_team_by_id/")
+		@DeleteMapping("/delet_employee_by_id/")
 		public ResponseEntity<String> suppequipe(@RequestParam Long id) { 
 		    if (this.equipeTechRepo.existsById(id)) {
 		        this.equipeTechRepo.deleteById(id);
-		        return new ResponseEntity<>("person of team with ID " + id + " was successfully deleted.", HttpStatus.OK);
+		        return new ResponseEntity<>("employee with ID " + id + " was successfully deleted.", HttpStatus.OK);
 		    } else {
-		        return new ResponseEntity<>("peron of team with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
+		        return new ResponseEntity<>("employee with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
 		    }
 		}
 		
 		// delete all 
-		@DeleteMapping("/delet_all_teams")
-		public   ResponseEntity<Void> supprimerAllequipe() {
+		@DeleteMapping("/delet_all_employees")
+		public   ResponseEntity<String> supprimerAllequipe() {
 			this.equipeTechRepo.deleteAll();
-			return ResponseEntity.noContent().build();
-			//return ResponseEntity<>("all users  were successfully deleted",HttpStatus.)); //method is used to return an HTTP 204 No Content status code, indicating that the delete
+			
+		return new  ResponseEntity<>("all users  were successfully deleted",HttpStatus.OK);
 			}
 
 		
 		
-		@PostMapping("/add_team")
+		@PostMapping("/add_employee")
 		public ResponseEntity<String> ajouterequipe (@RequestBody EquipeTech equipeTech ) {
-			
+			Optional<EquipeTech> existeEmployee = this.equipeTechRepo.findByEmail(equipeTech.getEmail());
 			
 			if (this.equipeTechRepo.existsById(equipeTech.getId())) {
 				return 
-					new ResponseEntity<>("team' person  with id  " + equipeTech.getId() + " already exists.", HttpStatus.CONFLICT); 	}
+					new ResponseEntity<>("employee with id  " + equipeTech.getId() + " already exists.", HttpStatus.CONFLICT); 	}
+			
+			else if(existeEmployee.isPresent()) {
+				return new ResponseEntity<>("please change this email , there is an acount created with that email "+equipeTech.getEmail(),HttpStatus.CONFLICT);
+			    }
+			
 			else {
 				EquipeTech nv= new EquipeTech ();
 			nv.setDateDeNaissance(equipeTech.getDateDeNaissance());		
@@ -126,28 +181,17 @@ public class EquipeTechController {
 			nv.setTel(equipeTech.getTel());
 			nv.setMdp(equipeTech.getMdp());
 			
+			nv.setCin(equipeTech.getCin());
+			nv.setCivilité(equipeTech.getCivilité());
 			this.equipeTechRepo.save(nv);
-			return new ResponseEntity<>("team's persson  with id  " + equipeTech.getId() + " added successfully.", HttpStatus.CREATED);
+			return new ResponseEntity<>("employee  with id  " + equipeTech.getId() + " added successfully.", HttpStatus.CREATED);
 			}
 			}
 		
-		@PostMapping("/add_team/{id}")
-		public ResponseEntity<String> ajoutTeam (@PathVariable Long id , @RequestParam String nom, @RequestParam String prénom, @RequestParam String email,
-				@RequestParam String tel,@RequestParam String sexe,@RequestParam Date dateDeNaissance,@RequestParam String mdp){
-			Optional<EquipeTech> clexiste =equipeTechRepo.findById(id);
-			if (clexiste.isPresent()) {
-				return null ;}
-				else {
-					EquipeTech equipeTech= new EquipeTech( );
-					 this.equipeTechRepo.save(equipeTech);
-					return new ResponseEntity<>("team with id  " + equipeTech.getId() + " added successfully.", HttpStatus.CREATED);
-				}
-			
-		}
 
 		
-		@PutMapping("/update_team/{iid}")
-		public EquipeTech updateEquipe (@PathVariable("iid") Long id , @RequestBody EquipeTech equipeTech) {
+		@PutMapping("/update_employee/{iid}")
+		public ResponseEntity<String> updateEquipe (@PathVariable("iid") Long id , @RequestBody EquipeTech equipeTech) {
 			
 			Optional<EquipeTech > existeteam = equipeTechRepo.findById(id);
 	        if (existeteam.isPresent()) {
@@ -159,11 +203,17 @@ public class EquipeTechController {
 	        	nv.setPrénom(equipeTech.getPrénom());
 	        	nv.setSexe(equipeTech.getSexe());
 	        	nv.setTel(equipeTech.getTel());
-	        	return this.equipeTechRepo.save(nv);
-	        	}
-	        else throw new NoSuchElementException("team' person not found with that ID: " + equipeTech.getId());
-	         
+	        	nv.setMdp(equipeTech.getMdp());
+				nv.setCin(equipeTech.getCin());
+				nv.setCivilité(equipeTech.getCivilité());
+	        	 this.equipeTechRepo.save(nv);
+	        	 
+	       return new ResponseEntity<> ("employee  with ID: "+ id +"updated successfully",HttpStatus.OK);
+        	}
+        else
+        	return new ResponseEntity<> ("employee not found with ID: "+ id ,HttpStatus.CONFLICT);
 		}
+		
 		
 		
 		
@@ -172,9 +222,9 @@ public class EquipeTechController {
 		public ResponseEntity<String> getNomById(@PathVariable Long id) {
 		    Optional<EquipeTech> existeteam = equipeTechRepo.findById(id);
 		    if (existeteam.isPresent()) {
-		        return new ResponseEntity<>( "the name of team's person is : "+existeteam.get().getNom(), HttpStatus.OK);
+		        return new ResponseEntity<>( "the name of employee is : "+existeteam.get().getNom(), HttpStatus.OK);
 		    } else {
-		        return new ResponseEntity<>( "team's person not found with that id "+ id ,HttpStatus.NOT_FOUND);
+		        return new ResponseEntity<>( "employee not found with that id "+ id ,HttpStatus.NOT_FOUND);
 		    }
 		}
 		
@@ -183,10 +233,10 @@ public class EquipeTechController {
 		public ResponseEntity<String> findPrénomById(@PathVariable Long id) {
 	        Optional<EquipeTech> existeteam = equipeTechRepo.findById(id);
 	        if (existeteam.isPresent() ) {
-	        	 return new ResponseEntity<>("the last name of team's person  is :"+existeteam.get().getPrénom(), HttpStatus.OK);     
+	        	 return new ResponseEntity<>("the last name of employee  is :"+existeteam.get().getPrénom(), HttpStatus.OK);     
 	        	}
 	        else {
-	        	return new ResponseEntity<>("team's person  not found with that id "+ id,HttpStatus.NOT_FOUND);
+	        	return new ResponseEntity<>("employee  not found with that id "+ id,HttpStatus.NOT_FOUND);
 	        }
 	        }
 		
@@ -195,10 +245,10 @@ public class EquipeTechController {
 		public ResponseEntity <String> getEmailById(@PathVariable Long id ) {
 	        Optional<EquipeTech> existeadmin = equipeTechRepo.findById(id);
 	        if (existeadmin.isPresent() ) {
-	        	 return new ResponseEntity<>("the e-mail of client is : "+existeadmin.get().getEmail(), HttpStatus.OK);     
+	        	 return new ResponseEntity<>("the e-mail of employee is : "+existeadmin.get().getEmail(), HttpStatus.OK);     
 	        	}
 	        else 
-	        	return new ResponseEntity<>("client not found with that id "+ id,HttpStatus.NOT_FOUND);
+	        	return new ResponseEntity<>("employee not found with that id "+ id,HttpStatus.NOT_FOUND);
 	       }
 		
 
@@ -206,10 +256,10 @@ public class EquipeTechController {
 		public ResponseEntity <String> getTelById(@PathVariable Long id ) {
 	        Optional<EquipeTech> existeam = equipeTechRepo.findById(id);
 	        if (existeam.isPresent() ) {
-	        	 return new ResponseEntity<>("the phone number of clien is :"+existeam.get().getTel(), HttpStatus.OK);     
+	        	 return new ResponseEntity<>("the phone number of employee is :"+existeam.get().getTel(), HttpStatus.OK);     
 	        	}
 	        else 
-	        	return new ResponseEntity<>("client not found with that id "+ id,HttpStatus.NOT_FOUND);  }
+	        	return new ResponseEntity<>("employee not found with that id "+ id,HttpStatus.NOT_FOUND);  }
 		
 		
 		
@@ -218,10 +268,10 @@ public class EquipeTechController {
 		public ResponseEntity <String> getSexeById(@PathVariable Long id ) {
 	        Optional<EquipeTech> existeam= equipeTechRepo.findById(id);
 	        if (existeam.isPresent() ) {
-	        	 return new ResponseEntity<>("the sexe of client is :"+existeam.get().getSexe(), HttpStatus.OK);     
+	        	 return new ResponseEntity<>("the sexe of employee is :"+existeam.get().getSexe(), HttpStatus.OK);     
 	        	}
 	        else 
-	        	return new ResponseEntity<>("client not found with that id "+ id,HttpStatus.NOT_FOUND);  }
+	        	return new ResponseEntity<>("employee not found with that id "+ id,HttpStatus.NOT_FOUND);  }
 		
 		
 		
@@ -234,4 +284,41 @@ public class EquipeTechController {
 	        	}
 	        else 
 	        	return new ResponseEntity<>(HttpStatus.NOT_FOUND);  }
+		
+		
+@GetMapping("/get_by_id/{id}/civility")
+public ResponseEntity <String> getcivilitéById(@PathVariable Long id ) {
+    Optional<EquipeTech> existeadmin = equipeTechRepo.findById(id);
+    if (existeadmin.isPresent() ) {
+    	return new ResponseEntity<>("the civility  of employee is "+existeadmin.get().getCivilité(), HttpStatus.OK); 
+    	}
+    else 
+    	return new ResponseEntity<>("employee not found with that id "+ id,HttpStatus.NOT_FOUND);  }	
+		
+
+@GetMapping("/get_by_id/{id}/national_identity_card")
+public ResponseEntity <String> getcinById(@PathVariable Long id ) {
+Optional<EquipeTech> existeadmin = equipeTechRepo.findById(id);
+if (existeadmin.isPresent() ) {
+return new ResponseEntity<>("the national identity card  of employee is "+existeadmin.get().getCin(), HttpStatus.OK); 
+}
+else 
+return new ResponseEntity<>("employee not found with that id "+ id,HttpStatus.NOT_FOUND);  }	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 }

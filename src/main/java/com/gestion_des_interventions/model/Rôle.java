@@ -19,7 +19,7 @@ public class Rôle {
 	/*private Boolean type  ---> 1 = admin /0=utilisateur*/
 	
 	@OneToMany
-	 private List <Compte> employes = new ArrayList<Compte>();
+	 private List <Compte> comptes = new ArrayList<Compte>();
 	
 	
 	

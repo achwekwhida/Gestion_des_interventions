@@ -1,6 +1,9 @@
 package com.gestion_des_interventions.model;
 
+
+
 import java.util.ArrayList;
+
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -16,7 +19,16 @@ public class Client extends Compte {
 	@JoinColumn(name = "admin_id")
 	private Admin admin;
 	@OneToMany
-	private List<Intervention>interventions= new ArrayList<Intervention>();
+	private List<Reclamation> reclamation = new ArrayList<Reclamation>();
+	
+    public Client(String nom) {
+        this.nom = nom;
+    }
+	public Client() {
+		super();
+		
+	}
+	}
 
 
-}
+

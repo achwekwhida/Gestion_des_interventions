@@ -9,20 +9,25 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 @Entity
-public class Tache {
+public class Mission {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Date dateDebut;
     private Date dateFin;
+    
+    
     @ManyToOne
-    @JoinColumn(name = "intervention_id") 
-    private Intervention intervention;
-	public Tache() {
+    @JoinColumn(name = "Employee_id") 
+    private EquipeTech equipeTech;
+    
+    @ManyToOne
+    private Admin admin ; 
+    
+	public Mission() {
 		super();
 	}
-	public Tache(Long id, Date dateDebut, Date dateFin) {
+	public Mission(Long id, Date dateDebut, Date dateFin) {
 		super();
 		this.id = id;
 		this.dateDebut = dateDebut;

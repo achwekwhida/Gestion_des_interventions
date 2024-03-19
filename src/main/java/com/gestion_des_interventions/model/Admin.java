@@ -17,20 +17,17 @@ public class Admin extends Compte{
 	
 	@OneToOne (mappedBy = "admin")
 	private RapportSuivi rapport_suivie;
-	
 	@OneToMany
 	private List <Intervention> intervention = new ArrayList<Intervention>();
 	@OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
 	private List<Client> client = new ArrayList<Client>();
 	@OneToMany
 	private List<EquipeTech> equipeTech = new ArrayList<EquipeTech>();
+	@OneToMany
+	private List<Produit> produit = new ArrayList<Produit>();
+	@OneToMany
+	private List<Reclamation> reclamation = new ArrayList<Reclamation>();
 	
-
-	public Admin(Long id, String nom, String prénom, String email, String tel, String sexe, Date dateDeNaissance,
-			String mdp) {
-		super(id, nom, prénom, email, tel, sexe, dateDeNaissance, mdp);
-		// TODO Auto-generated constructor stub
-	}
 	public Admin () {
 		super();
 	}

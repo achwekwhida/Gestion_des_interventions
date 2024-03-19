@@ -1,33 +1,34 @@
 package com.gestion_des_interventions.model;
 
 import java.util.Date;
-import java.util.List;
-
+import java.util.Set;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 @Entity
-public class Projet {
+public class Produit {
 	@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    private String titre;
+    private String nom;
     private Date dateDeLancement;
     
-    @OneToMany(mappedBy = "projet")
-    private List<Intervention> interventions;
+    @ManyToOne
+    private Admin admin ; 
+    @ManyToMany
+    Set<Reclamation> reclamation;
 
-	public Projet() {
+	public Produit() {
 		super();
 	}
-	public Projet(Long id, String titre, Date dateDeLancement) {
+	public Produit(Long id, String nom, Date dateDeLancement) {
 		super();
 		this.id = id;
-		this.titre = titre;
+		this.nom = nom;
 		this.dateDeLancement = dateDeLancement;
 	}
 	public Long getId() {
@@ -36,11 +37,11 @@ public class Projet {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getTitre() {
-		return titre;
+	public String getNom() {
+		return nom ;
 	}
-	public void setTitre(String titre) {
-		this.titre = titre;
+	public void setNom(String nom) {
+		this.nom = nom;
 	}
 	public Date getDateDeLancement() {
 		return dateDeLancement;

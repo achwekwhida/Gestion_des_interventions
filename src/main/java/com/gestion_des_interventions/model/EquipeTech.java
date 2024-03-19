@@ -1,7 +1,11 @@
 package com.gestion_des_interventions.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
@@ -10,4 +14,14 @@ import jakarta.persistence.Table;
 public class EquipeTech  extends Compte{
 	@ManyToOne
 	private Admin admin;
+	@OneToMany
+	private List<Mission> mission = new ArrayList<Mission>();
+	@OneToMany
+	private List<Intervention> intervention= new ArrayList<Intervention>();
+	
+	
+	public EquipeTech() {
+		super();
+			}
+	
 }

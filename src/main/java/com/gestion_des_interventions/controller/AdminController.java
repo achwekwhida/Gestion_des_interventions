@@ -2,7 +2,6 @@ package com.gestion_des_interventions.controller;
 
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 
@@ -41,14 +40,14 @@ public class AdminController {
 	private EquipeTechRepo equipeTechRepo;
 	
 	
-	@GetMapping("/all")
+	@GetMapping("/get_all")
 	public List<Admin> getAll(){
 		return this.adminRepo.findAll();
 	}
 	
 	//@Requestparam
 	@GetMapping("/get_by_id/")
-	public ResponseEntity<Admin> getdByid(@RequestParam Long id) {
+	public ResponseEntity<Admin> getAdminByid(@RequestParam Long id) {
 	    Optional<Admin> adexiste = this.adminRepo.findById(id);
 	    if (adexiste.isPresent()) {
 	        Admin admin = adexiste.get();
@@ -56,8 +55,21 @@ public class AdminController {
 	    } else {
 	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}}
+	
+@GetMapping("/get_by_id/{id}")
+	
+public ResponseEntity<Admin> getAdmin(@PathVariable Long id) {
+    Optional<Admin> adexiste = this.adminRepo.findById(id);
+    if (adexiste.isPresent()) {
+        Admin admin = adexiste.get();
+        return new ResponseEntity<>(admin, HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}}
+
+	
 	//@@PathVariabl
-	@GetMapping("/get_by_id/{id}")
+	@DeleteMapping("/delet_by_id/{id}")
 	
 	public ResponseEntity<String> supprimerAdmin(@PathVariable Long id) { 
 	    if (this.adminRepo.existsById(id)) {
@@ -78,24 +90,29 @@ public class AdminController {
 	        return new ResponseEntity<>("Admin with ID " + id + " was not found.", HttpStatus.NOT_FOUND);
 	    }
 	}
+	
 
 	
 	// delete all 
 	@DeleteMapping("/delet_all_admin")
-	public   ResponseEntity<Void> supprimerAdmin() {
+	public   ResponseEntity<String> supprimerAdmin() {
 		this.adminRepo.deleteAll();
-		return ResponseEntity.noContent().build(); 
+		return  new ResponseEntity<>("all admin were successfully deleted",HttpStatus.OK); 
 		}
 
 	
 	
 	@PostMapping("/add_admin")
 	public ResponseEntity<String> ajouterAdmin (@RequestBody Admin admin ) {
-		
+		Optional<Admin> existeAdmin = this.adminRepo.findByEmail(admin.getEmail());
 		
 		if (this.adminRepo.existsById(admin.getId())) {
-			
-		return new ResponseEntity<>("admin with id  " + admin.getId() + " already exists.", HttpStatus.CONFLICT); 	}
+			return new ResponseEntity<>("admin with id  " + admin.getId() + " already exists.", HttpStatus.CONFLICT); 	}
+		
+		else if(existeAdmin.isPresent()) {
+			return new ResponseEntity<>("please change this email , there is an acount created with that email "+admin.getEmail(),HttpStatus.CONFLICT);
+		    }
+		
 		else {
 		Admin nv= new Admin ();
 		nv.setDateDeNaissance(admin.getDateDeNaissance());		
@@ -106,32 +123,20 @@ public class AdminController {
 		nv.setSexe(admin.getSexe());
 		nv.setTel(admin.getTel());
 		nv.setMdp(admin.getMdp());
-		
+		nv.setCin(admin.getCin());
+		nv.setCivilité(admin.getCivilité());
 		this.adminRepo.save(nv);
-		return new ResponseEntity<>("client with id  " + admin.getId() + " added successfully.", HttpStatus.CREATED);
-		}
-		}
-	
-	@PostMapping("/add_admin/{id}")
-	public ResponseEntity<String> ajoutAdmin (@PathVariable Long id , @RequestParam String nom, @RequestParam String prénom, @RequestParam String email,
-			@RequestParam String tel,@RequestParam String sexe,@RequestParam Date dateDeNaissance,@RequestParam String mdp){
-		Optional<Admin> adexiste =adminRepo.findById(id);
-		if (adexiste.isPresent()) {
-			return null ;}
-			else {
-				Admin admin= new Admin( );
-				 this.adminRepo.save(admin);
-				return new ResponseEntity<>("client with id  " + admin.getId() + " added successfully.", HttpStatus.CREATED);
-			}
 		
-	}
-
+		return new ResponseEntity<>("admin with id  " + admin.getId() + " added successfully.", HttpStatus.CREATED);
+		}
+		}
 	
+
 	@PutMapping("/update_admin/{iid}")
-	public Admin updateAdmin (@PathVariable("iid") Long id , @RequestBody Admin admin) {
+	public ResponseEntity<String> updateAdmin (@PathVariable("iid") Long id , @RequestBody Admin admin) {
 		
 		Optional<Admin > existeAdmin = adminRepo.findById(id);
-        if (existeAdmin.isPresent()) {
+		if (existeAdmin.isPresent()) {
         	Admin nv=existeAdmin.get();
         	nv.setDateDeNaissance(admin.getDateDeNaissance());
         	nv.setEmail(admin.getEmail());
@@ -140,11 +145,15 @@ public class AdminController {
         	nv.setPrénom(admin.getPrénom());
         	nv.setSexe(admin.getSexe());
         	nv.setTel(admin.getTel());
-        	return this.adminRepo.save(nv);
+        	nv.setCin(admin.getCin());
+        	nv.setCivilité(admin.getCivilité());
+        	 this.adminRepo.save(nv);
+        	 return new ResponseEntity<> ("admin  with ID: "+ id + " updated successfully",HttpStatus.OK);
         	}
-        else throw new NoSuchElementException("admin not found with ID: " + admin.getId());
-         
-	}
+        else
+        return new ResponseEntity<> ("admin not found with ID: "+ id ,HttpStatus.CONFLICT);
+        }
+	
 	
 	
 	
@@ -164,7 +173,7 @@ public class AdminController {
 	public ResponseEntity<String> findPrénomById(@PathVariable Long id) {
         Optional<Admin> existeadmin = adminRepo.findById(id);
         if (existeadmin.isPresent() ) {
-        	 return new ResponseEntity<>("the last name os admin is :"+existeadmin.get().getPrénom(), HttpStatus.OK);     
+        	 return new ResponseEntity<>("the last name of admin is :"+existeadmin.get().getPrénom(), HttpStatus.OK);     
         	}
         else {
         	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);
@@ -216,11 +225,27 @@ public class AdminController {
         else 
         	return new ResponseEntity<>(HttpStatus.NOT_FOUND);  }
 	
+	@GetMapping("/get_by_id/{id}/civility")
+	public ResponseEntity <String> getcivilitéById(@PathVariable Long id ) {
+        Optional<Admin> existeadmin = adminRepo.findById(id);
+        if (existeadmin.isPresent() ) {
+        	return new ResponseEntity<>("the civility  of admin is "+existeadmin.get().getCivilité(), HttpStatus.OK); 
+        	}
+        else 
+        	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);  }
 	
+	@GetMapping("/get_by_id/{id}/national_identity_card")
+	public ResponseEntity <String> getCinById(@PathVariable Long id ) {
+        Optional<Admin> existeadmin = adminRepo.findById(id);
+        if (existeadmin.isPresent() ) {
+        	return new ResponseEntity<>("the national identity card of admin is "+existeadmin.get().getCin(), HttpStatus.OK); 
+        	}
+        else 
+        	return new ResponseEntity<>("admin not found with that id "+ id,HttpStatus.NOT_FOUND);  }
 	
-	/*@GetMapping("get_admin/{nom}")
+	@GetMapping("get_admin/{nom}")
 	public  ResponseEntity<Admin> getByNom(@PathVariable ("nom") String nom) {
-		Optional<Admin> existeadmin= this.adminRepo.findByNomAdmin(nom);
+		Optional<Admin> existeadmin= this.adminRepo.findByNom(nom);
 				if ( existeadmin.isPresent()) {
 					 return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);}
 				
@@ -228,20 +253,70 @@ public class AdminController {
 					return new ResponseEntity<>(HttpStatus.NOT_FOUND);}
 	}
 	
-	
-	
-	
-	
-	
-/*	
 	@GetMapping("get_admin/{prénom}")
 	public ResponseEntity<Admin> getByPrenom(@PathVariable String prénom ){
-		Optional<Admin> existeadmin=this.adminRepo.findByPrenomAdmin(prénom);
+		Optional<Admin> existeadmin=this.adminRepo.findByPrénom(prénom);
 		if ( existeadmin.isPresent()) {
 			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
 		}
 		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	}*/
+	}
+	
+	@GetMapping("get_admin/{sexe}")
+	public ResponseEntity<Admin> getBySexe(@PathVariable String sexe ){
+		Optional<Admin> existeadmin=this.adminRepo.findBySexe(sexe);
+		if ( existeadmin.isPresent()) {
+			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_admin/{civilité}")
+	public ResponseEntity<Admin> getByCivilité(@PathVariable String civilité ){
+		Optional<Admin> existeadmin=this.adminRepo.findByCivilité(civilité);
+		if ( existeadmin.isPresent()) {
+			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_admin/{tel}")
+	public ResponseEntity<Admin> getByTel(@PathVariable String tel ){
+		Optional<Admin> existeadmin=this.adminRepo.findByTel(tel);
+		if ( existeadmin.isPresent()) {
+			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+	
+	@GetMapping("get_admin/{active}")
+	public ResponseEntity<Admin> getByActive(@PathVariable Boolean active ){
+		Optional<Admin> existeadmin=this.adminRepo.findByActive(active);
+		if ( existeadmin.isPresent()) {
+			return new ResponseEntity<>(existeadmin.get(), HttpStatus.OK);
+		}
+		else  return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	}
+
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	   @PostMapping("/client/add")
